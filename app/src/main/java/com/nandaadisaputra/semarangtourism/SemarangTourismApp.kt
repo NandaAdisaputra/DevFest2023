@@ -13,11 +13,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.nandaadisaputra.semarangtourism.ui.about.AboutScreen
+import com.nandaadisaputra.semarangtourism.ui.detail.DetailScreen
 import com.nandaadisaputra.semarangtourism.ui.favorite.FavoriteScreen
 import com.nandaadisaputra.semarangtourism.ui.home.HomeScreen
 import com.nandaadisaputra.semarangtourism.ui.navigation.NavigationItem
@@ -44,7 +47,29 @@ fun SemarangTourismApp(
                     .padding(innerPadding)
             ) {
                 composable(Screen.Home.route) {
-                    HomeScreen()
+                    HomeScreen(
+                        navigateToDetail = { tourismId ->
+                            navController.navigate(
+                                Screen.Detail.createRoute(
+                                    tourismId
+                                )
+                            )
+                        }
+                    )
+                }
+                composable(
+                    route = Screen.Detail.route,
+                    arguments = listOf(
+                        navArgument("id") { type = NavType.IntType }
+                    )
+                ) {
+                    val id = it.arguments?.getInt("id") ?: -1
+                    DetailScreen(
+                        tourismId = id,
+                        navigateBack = {
+                            navController.navigateUp()
+                        }
+                    )
                 }
                 composable(Screen.Favorite.route) {
                     FavoriteScreen()

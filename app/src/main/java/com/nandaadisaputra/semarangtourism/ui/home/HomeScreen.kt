@@ -1,58 +1,122 @@
 package com.nandaadisaputra.semarangtourism.ui.home
 
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.nandaadisaputra.semarangtourism.R
+import com.nandaadisaputra.semarangtourism.data.constant.Const
+import com.nandaadisaputra.semarangtourism.data.model.SemarangTourismModel
+import com.nandaadisaputra.semarangtourism.ui.custom.Empty
+import com.nandaadisaputra.semarangtourism.ui.custom.ItemLayout
+import com.nandaadisaputra.semarangtourism.ui.custom.SearchView
 import com.nandaadisaputra.semarangtourism.ui.theme.SemarangTourismTheme
+import com.nandaadisaputra.semarangtourism.ui.theme.backgroundColor
+import com.nandaadisaputra.semarangtourism.ui.utils.UiState
 
 @Composable
-fun HomeScreen() {
-    SemarangTourismTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-            .wrapContentWidth(Alignment.CenterHorizontally)
-            .wrapContentHeight(Alignment.CenterVertically),
-            color = MaterialTheme.colors.background,
-        ) {
-            Greeting("Home")
+fun HomeScreen(
+    navigateToDetail: (Int) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val query by viewModel.query
+    viewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
+                viewModel.search(query)
+            }
+            is UiState.Success -> {
+                Home(
+                    listTourism = uiState.data,
+                    query = query,
+                    onQueryChange = viewModel::search,
+                    navigateToDetail = navigateToDetail
+                )
+            }
+            is UiState.Error -> {
+
+            }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(
-        text = "Ini Halaman $name!",
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        modifier = Modifier
-            .clickable { }
-            .background(Color.White)
-            .padding(8.dp)
-            .border(2.dp, Color.Blue)
-            .padding(8.dp),
-        color = Color.Blue,
+fun Home(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    listTourism: List<SemarangTourismModel>,
+    navigateToDetail: (Int) -> Unit
+) {
+    Column {
+        SearchView(
+            query = query,
+            onQueryChange = onQueryChange
+        )
+        if (listTourism.isNotEmpty()) {
+            ListTourism(
+                listTourism = listTourism,
+                navigateToDetail = navigateToDetail
+            )
+        } else {
+            Empty(
+                contentText = stringResource(R.string.empty_data),
+                modifier = Modifier
+                    .testTag(Const.Cons.EMPTY)
+            )
+        }
+    }
+}
 
-        textAlign = TextAlign.Center
-    )
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ListTourism(
+    listTourism: List<SemarangTourismModel>,
+    navigateToDetail: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    contentPaddingTop: Dp = 0.dp,
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = contentPaddingTop),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+            .background(backgroundColor)
+            .testTag(Const.Cons.TAG)
+    ) {
+        items(listTourism, key = { it.id }) { item ->
+            ItemLayout(
+                photoUrl = item.photoUrl,
+                title = item.name,
+                modifier = Modifier
+                    .background(backgroundColor)
+                    .animateItemPlacement(tween(durationMillis = 200))
+                    .clickable { navigateToDetail(item.id) }
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HomeContentPreview() {
-    SemarangTourismTheme {
-        Greeting("Home")
+    SemarangTourismTheme{
+        Home(
+            query = "",
+            listTourism = emptyList(),
+            onQueryChange = {},
+            navigateToDetail = {}
+        )
     }
 }

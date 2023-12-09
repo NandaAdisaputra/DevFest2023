@@ -1,28 +1,31 @@
 package com.nandaadisaputra.semarangtourism.ui.theme
 
-import androidx.compose.material.Typography
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import com.nandaadisaputra.semarangtourism.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    body1 = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+
+@Immutable
+data class SemarangTourismTypography(
+    val caption: TextStyle,
+    val body: TextStyle,
+    val title: TextStyle
+)
+
+val LocalSemarangTourismTypography = staticCompositionLocalOf {
+    SemarangTourismTypography(
+        caption = TextStyle.Default,
+        body = TextStyle.Default,
+        title = TextStyle.Default
     )
-    /* Other default text styles to override
-    button = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W500,
-        fontSize = 14.sp
-    ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    )
-    */
+}
+
+val fontFamily = FontFamily(
+    Font(R.font.regular, FontWeight.Normal),
+    Font(R.font.medium, FontWeight.Medium),
+    Font(R.font.bold, FontWeight.Bold)
 )
